@@ -85,7 +85,7 @@ int main()
             Vector3 direction = canvasToViewport(x, y);
             SDL_Color color = traceRay(cameraPos, direction, 0.2, std::numeric_limits<float>::infinity());
             SDL_SetRenderDrawColor(renderer, color.r, color.b, color.g, color.a);
-            SDL_RenderDrawPoint(renderer, x + CANVAS_WIDTH / 2, y + CANVAS_HEIGHT / 2);
+            SDL_RenderDrawPoint(renderer, -x + CANVAS_WIDTH / 2, -y + CANVAS_HEIGHT / 2);
         }
     }
 
