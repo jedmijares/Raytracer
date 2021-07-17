@@ -104,7 +104,7 @@ int main()
 
 Vector3 canvasToViewport(int x, int y)
 {
-    return Vector3{x * VIEWPORT_WIDTH / CANVAS_WIDTH, y * VIEWPORT_HEIGHT / CANVAS_HEIGHT, VIEWPORT_DISTANCE};
+    return Vector3{(float)x * VIEWPORT_WIDTH / CANVAS_WIDTH, (float)y * VIEWPORT_HEIGHT / CANVAS_HEIGHT, VIEWPORT_DISTANCE};
 }
 
 SDL_Color traceRay(Vector3 origin, Vector3 direction, float tMin, float tMax)
