@@ -8,12 +8,12 @@ private:
 public:
     Vector3 center;
     float radius;
-    uint32_t color;
-    Sphere(Vector3 centerIn, float radiusIn, uint32_t colorIn);
+    SDL_Color color;
+    Sphere(Vector3 centerIn, float radiusIn, SDL_Color colorIn);
     ~Sphere();
 };
 
-Sphere::Sphere(Vector3 centerIn, float radiusIn, uint32_t colorIn)
+Sphere::Sphere(Vector3 centerIn, float radiusIn, SDL_Color colorIn)
 {
     center = centerIn;
     radius = radiusIn;

@@ -12,6 +12,16 @@ public:
     Vector3(float xIn, float yIn, float zIn);
     Vector3();
     ~Vector3();
+
+    float dot(Vector3 const &other)
+    {
+        return x * other.x + y * other.y + z * other.z;
+    }
+
+    Vector3 operator-(Vector3 const &other)
+    {
+        return Vector3(x - other.x, y - other.y, z - other.z);
+    }
 };
 
 Vector3::Vector3(float xIn, float yIn, float zIn)
