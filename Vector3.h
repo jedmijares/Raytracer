@@ -1,6 +1,8 @@
 #ifndef VECTOR3
 #define VECTOR3
 
+#include <cmath>
+
 class Vector3
 {
 private:
@@ -13,6 +15,11 @@ public:
     Vector3();
     ~Vector3();
 
+    float length()
+    {
+        return sqrt(x * x + y * y + z * z);
+    }
+
     float dot(Vector3 const &other)
     {
         return x * other.x + y * other.y + z * other.z;
@@ -21,6 +28,16 @@ public:
     Vector3 operator-(Vector3 const &other)
     {
         return Vector3(x - other.x, y - other.y, z - other.z);
+    }
+
+    Vector3 operator+(Vector3 const &other)
+    {
+        return Vector3(x + other.x, y + other.y, z + other.z);
+    }
+
+    Vector3 operator*(float scalar)
+    {
+        return Vector3(x * scalar, y * scalar, z * scalar);
     }
 };
 

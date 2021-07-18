@@ -1,10 +1,15 @@
 #include "Vector3.h"
 #include "Sphere.h"
+#include "Light.h"
+#include "PointLight.h"
+#include "AmbientLight.h"
+#include "DirectionalLight.h"
 #include <SDL2/SDL.h>
 #include <limits>
 #include <cmath>
 #include <utility>
 #include <vector>
+#include <memory>
 
 const int CANVAS_WIDTH = 1280;
 const int CANVAS_HEIGHT = 1280;
@@ -14,10 +19,13 @@ const int VIEWPORT_HEIGHT = 10;
 const int VIEWPORT_DISTANCE = 10;
 
 std::vector<Sphere> spheres;
+std::vector<std::unique_ptr<Light::Light>> lights;
 
 Vector3 canvasToViewport(int x, int y);
 SDL_Color traceRay(Vector3 origin, Vector3 direction, float tMin, float tMax);
 std::pair<float, float> intersectRaySphere(Vector3 origin, Vector3 direction, Sphere sphere);
+float computeLighting(Vector3 point, Vector3 normal);
+SDL_Color scaleColor(SDL_Color original, float intensity);
 
 SDL_Color BACKGROUND_COLOR = SDL_Color{255, 255, 255, 255}; // white
 
@@ -50,6 +58,12 @@ int main()
             Vector3(-2, 0, 4),
             1,
             SDL_Color{0, 255, 0, 255}));
+
+    // Light::DirectionalLight test(0.2, Vector3(1, 4, 4));
+    // lights.emplace_back(test);
+    lights.emplace_back(std::make_unique<Light::AmbientLight>(0.2));
+    lights.emplace_back(std::make_unique<Light::PointLight>(0.6, Vector3(2, 1, 0)));
+    lights.emplace_back(std::make_unique<Light::DirectionalLight>(0.2, Vector3(1, 4, 4)));
 
     Vector3 cameraPos{0, 0, 0};
     for (int x = -CANVAS_WIDTH / 2; x < CANVAS_WIDTH / 2; ++x)
@@ -103,7 +117,11 @@ SDL_Color traceRay(Vector3 origin, Vector3 direction, float tMin, float tMax)
     }
     if (closestSphere)
     {
-        return closestSphere->color;
+        Vector3 point = origin + direction * closestT; // find intersection
+        Vector3 normal = point - closestSphere->center;
+        normal = normal * (1.0 / normal.length());
+        float intensity = computeLighting(point, normal);
+        return scaleColor(closestSphere->color, intensity);
     }
     return BACKGROUND_COLOR;
 }
@@ -127,4 +145,23 @@ std::pair<float, float> intersectRaySphere(Vector3 origin, Vector3 direction, Sp
     float t2 = (-b - sqrt(discriminant)) / (2 * a);
 
     return std::pair<float, float>{t1, t2};
+}
+
+float computeLighting(Vector3 point, Vector3 normal)
+{
+    float intensity = 0;
+    for (auto &&light : lights)
+    {
+        intensity += light->computeLighting(point, normal);
+    }
+    return intensity;
+}
+
+SDL_Color scaleColor(SDL_Color original, float intensity)
+{
+    return SDL_Color{
+        (uint8_t)(original.r * intensity),
+        (uint8_t)(original.b * intensity),
+        (uint8_t)(original.g * intensity),
+        (uint8_t)(original.a * intensity)};
 }
