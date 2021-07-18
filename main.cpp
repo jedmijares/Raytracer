@@ -91,12 +91,14 @@ int main()
 
     SDL_RenderPresent(renderer);
 
-    SDL_Delay(5000);
-
-    //Destroy window
+    SDL_Event event;
+    while (1)
+    {
+        if (SDL_PollEvent(&event) && event.type == SDL_QUIT)
+            break;
+    }
+    SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-
-    //Quit SDL subsystems
     SDL_Quit();
 
     return 0;
