@@ -23,15 +23,9 @@ SDL_Color BACKGROUND_COLOR = SDL_Color{255, 255, 255, 255}; // white
 
 int main()
 {
-    //The window we'll be rendering to
     SDL_Window *window = nullptr;
-
     SDL_Renderer *renderer = nullptr;
 
-    // //The surface contained by the window
-    // SDL_Surface *screenSurface = NULL;
-
-    //Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
@@ -39,26 +33,6 @@ int main()
     else
     {
         SDL_CreateWindowAndRenderer(CANVAS_WIDTH, CANVAS_HEIGHT, 0, &window, &renderer);
-        //Create window
-        // window = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, CANVAS_WIDTH, CANVAS_HEIGHT, SDL_WINDOW_SHOWN);
-        // if (window == NULL)
-        // {
-        //     printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-        // }
-        // else
-        // {
-        //     //Get window surface
-        //     screenSurface = SDL_GetWindowSurface(window);
-
-        //     //Fill the surface white
-        //     SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
-
-        //     //Update the surface
-        //     SDL_UpdateWindowSurface(window);
-
-        //     //Wait two seconds
-        //     SDL_Delay(2000);
-        // }
     }
 
     spheres.emplace_back(
