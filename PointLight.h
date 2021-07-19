@@ -14,7 +14,6 @@ namespace Light
 
     public:
         PointLight(float intensityIn, Vector3 position);
-        Vector3 getPosition();
         virtual float computeLighting(Vector3 point, Vector3 normal);
     };
 
@@ -34,12 +33,6 @@ namespace Light
         }
         return 0;
     }
-
-    Vector3 PointLight::getPosition()
-    {
-        return position_;
-    }
-
 } // namespace Light
 
 #endif

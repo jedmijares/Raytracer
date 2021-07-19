@@ -15,7 +15,6 @@ namespace Light
     public:
         DirectionalLight(float intensityIn, Vector3 direction);
         virtual float computeLighting(Vector3 point, Vector3 normal);
-        Vector3 getDirection();
     };
 
     DirectionalLight::DirectionalLight(float intensityIn, Vector3 direction)
@@ -33,12 +32,6 @@ namespace Light
         }
         return 0;
     }
-
-    Vector3 DirectionalLight::getDirection()
-    {
-        return direction_;
-    }
-
 } // namespace Light
 
 #endif
