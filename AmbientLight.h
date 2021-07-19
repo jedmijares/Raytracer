@@ -6,7 +6,7 @@
 namespace Light
 {
 
-    class AmbientLight : virtual public Light
+    class AmbientLight : public Light
     {
     public:
         AmbientLight(float intensityIn);
