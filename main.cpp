@@ -59,8 +59,6 @@ int main()
             1,
             SDL_Color{0, 255, 0, 255}));
 
-    // Light::DirectionalLight test(0.2, Vector3(1, 4, 4));
-    // lights.emplace_back(test);
     lights.emplace_back(std::make_unique<Light::AmbientLight>(0.2));
     lights.emplace_back(std::make_unique<Light::PointLight>(0.6, Vector3(2, 1, 0)));
     lights.emplace_back(std::make_unique<Light::DirectionalLight>(0.2, Vector3(1, 4, 4)));
