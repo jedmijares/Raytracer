@@ -6,7 +6,6 @@
 
 namespace Light
 {
-
     class PointLight : public Light
     {
     private:

@@ -6,7 +6,6 @@
 
 namespace Light
 {
-
     class DirectionalLight : public Light
     {
     private:

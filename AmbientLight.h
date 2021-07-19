@@ -5,7 +5,6 @@
 
 namespace Light
 {
-
     class AmbientLight : public Light
     {
     public:
@@ -22,7 +21,6 @@ namespace Light
     {
         return intensity;
     }
-
 } // namespace Light
 
 #endif
