@@ -1,15 +1,16 @@
-#include "Vector3.h"
-#include "Sphere.h"
-#include "Light.h"
-#include "PointLight.h"
 #include "AmbientLight.h"
 #include "DirectionalLight.h"
+#include "Light.h"
+#include "PointLight.h"
+#include "Sphere.h"
+#include "Vector3.h"
 #include <SDL2/SDL.h>
-#include <limits>
+#include <algorithm>
 #include <cmath>
+#include <limits>
+#include <memory>
 #include <utility>
 #include <vector>
-#include <memory>
 
 const int CANVAS_WIDTH = 1280;
 const int CANVAS_HEIGHT = 1280;
@@ -24,8 +25,9 @@ std::vector<std::unique_ptr<Light::Light>> lights;
 Vector3 canvasToViewport(int x, int y);
 SDL_Color traceRay(Vector3 origin, Vector3 direction, float tMin, float tMax);
 std::pair<float, float> intersectRaySphere(Vector3 origin, Vector3 direction, Sphere sphere);
-float computeLighting(Vector3 point, Vector3 normal);
+float computeLighting(Vector3 point, Vector3 normal, Vector3 viewDir, float);
 SDL_Color scaleColor(SDL_Color original, float intensity);
+float clamp(float orig, float min, float max);
 
 SDL_Color BACKGROUND_COLOR = SDL_Color{255, 255, 255, 255}; // white
 
@@ -47,17 +49,26 @@ int main()
         Sphere(
             Vector3(0, -1, 3),
             1,
-            SDL_Color{255, 0, 0, 255}));
+            SDL_Color{255, 0, 0, 255},
+            500));
     spheres.emplace_back(
         Sphere(
             Vector3(2, 0, 4),
             1,
-            SDL_Color{0, 0, 255, 255}));
+            SDL_Color{0, 0, 255, 255},
+            500));
     spheres.emplace_back(
         Sphere(
             Vector3(-2, 0, 4),
             1,
-            SDL_Color{0, 255, 0, 255}));
+            SDL_Color{0, 255, 0, 255},
+            10));
+    spheres.emplace_back(
+        Sphere(
+            Vector3(0, -5001, 0),
+            5000,
+            SDL_Color{255, 255, 0, 255},
+            1000));
 
     lights.emplace_back(std::make_unique<Light::AmbientLight>(0.2));
     lights.emplace_back(std::make_unique<Light::PointLight>(0.6, Vector3(2, 1, 0)));
@@ -71,7 +82,7 @@ int main()
             Vector3 direction = canvasToViewport(x, y);
             SDL_Color color = traceRay(cameraPos, direction, 0.2, std::numeric_limits<float>::infinity());
             SDL_SetRenderDrawColor(renderer, color.r, color.b, color.g, color.a);
-            SDL_RenderDrawPoint(renderer, -x + CANVAS_WIDTH / 2, -y + CANVAS_HEIGHT / 2);
+            SDL_RenderDrawPoint(renderer, x + CANVAS_WIDTH / 2, -y + CANVAS_HEIGHT / 2);
         }
     }
 
@@ -118,7 +129,7 @@ SDL_Color traceRay(Vector3 origin, Vector3 direction, float tMin, float tMax)
         Vector3 point = origin + direction * closestT; // find intersection
         Vector3 normal = point - closestSphere->center;
         normal = normal * (1.0 / normal.length());
-        float intensity = computeLighting(point, normal);
+        float intensity = computeLighting(point, normal, -direction, closestSphere->specular);
         return scaleColor(closestSphere->color, intensity);
     }
     return BACKGROUND_COLOR;
@@ -145,12 +156,12 @@ std::pair<float, float> intersectRaySphere(Vector3 origin, Vector3 direction, Sp
     return std::pair<float, float>{t1, t2};
 }
 
-float computeLighting(Vector3 point, Vector3 normal)
+float computeLighting(Vector3 point, Vector3 normal, Vector3 viewDir, float specular)
 {
     float intensity = 0;
     for (auto &&light : lights)
     {
-        intensity += light->computeLighting(point, normal);
+        intensity += light->computeLighting(point, normal, viewDir, specular);
     }
     return intensity;
 }
@@ -158,8 +169,21 @@ float computeLighting(Vector3 point, Vector3 normal)
 SDL_Color scaleColor(SDL_Color original, float intensity)
 {
     return SDL_Color{
-        (uint8_t)(original.r * intensity),
-        (uint8_t)(original.b * intensity),
-        (uint8_t)(original.g * intensity),
-        (uint8_t)(original.a * intensity)};
+        (uint8_t)(clamp(original.r * intensity, 0, 255)),
+        (uint8_t)(clamp(original.b * intensity, 0, 255)),
+        (uint8_t)(clamp(original.g * intensity, 0, 255)),
+        (uint8_t)(clamp(original.a * intensity, 0, 255))};
+}
+
+float clamp(float orig, float min, float max)
+{
+    if (orig > max)
+    {
+        return max;
+    }
+    if (orig < min)
+    {
+        return min;
+    }
+    return orig;
 }

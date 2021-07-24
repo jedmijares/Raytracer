@@ -9,27 +9,40 @@ namespace Light
     class DirectionalLight : public Light
     {
     private:
-        Vector3 direction_;
+        Vector3 lightDir_;
 
     public:
         DirectionalLight(float intensityIn, Vector3 direction);
-        virtual float computeLighting(Vector3 point, Vector3 normal);
+        virtual float computeLighting(Vector3 point, Vector3 normal, Vector3 viewDir, float specular);
     };
 
     DirectionalLight::DirectionalLight(float intensityIn, Vector3 direction)
-        : direction_{direction}
+        : lightDir_{direction}
     {
         intensity = intensityIn;
     }
 
-    float DirectionalLight::computeLighting(Vector3 point, Vector3 normal)
+    float DirectionalLight::computeLighting(Vector3 point, Vector3 normal, Vector3 viewDir, float specular)
     {
-        float nDotL = normal.dot(direction_);
+        float returnIntensity = 0;
+
+        float nDotL = normal.dot(lightDir_);
         if (nDotL > 0)
         {
-            return intensity * nDotL / (normal.length() * direction_.length());
+            returnIntensity += intensity * nDotL / (normal.length() * lightDir_.length());
         }
-        return 0;
+
+        if (specular >= 0)
+        {
+            Vector3 reflectDir = normal * 2 * normal.dot(lightDir_) - lightDir_;
+            float rDotV = reflectDir.dot(viewDir);
+            if (rDotV > 0)
+            {
+                returnIntensity += intensity * pow(rDotV / (reflectDir.length() * viewDir.length()), specular);
+            }
+        }
+
+        return returnIntensity;
     }
 } // namespace Light
 

@@ -13,7 +13,7 @@ namespace Light
 
     public:
         PointLight(float intensityIn, Vector3 position);
-        virtual float computeLighting(Vector3 point, Vector3 normal);
+        virtual float computeLighting(Vector3 point, Vector3 normal, Vector3 viewDir, float specular);
     };
 
     PointLight::PointLight(float intensityIn, Vector3 position)
@@ -22,15 +22,28 @@ namespace Light
         intensity = intensityIn;
     }
 
-    float PointLight::computeLighting(Vector3 point, Vector3 normal)
+    float PointLight::computeLighting(Vector3 point, Vector3 normal, Vector3 viewDir, float specular)
     {
-        Vector3 direction = position_ - point;
-        float nDotL = normal.dot(direction);
+        float returnIntensity = 0;
+
+        Vector3 lightDir = position_ - point;
+        float nDotL = normal.dot(lightDir);
         if (nDotL > 0)
         {
-            return intensity * nDotL / (normal.length() * direction.length());
+            returnIntensity += intensity * nDotL / (normal.length() * lightDir.length());
         }
-        return 0;
+
+        if (specular >= 0)
+        {
+            Vector3 reflectDir = normal * 2 * normal.dot(lightDir) - lightDir;
+            float rDotV = reflectDir.dot(viewDir);
+            if (rDotV > 0)
+            {
+                returnIntensity += intensity * pow(rDotV / (reflectDir.length() * viewDir.length()), specular);
+            }
+        }
+
+        return returnIntensity;
     }
 } // namespace Light
 

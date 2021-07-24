@@ -9,7 +9,7 @@ namespace Light
     {
     public:
         AmbientLight(float intensityIn);
-        float computeLighting(Vector3 point, Vector3 normal);
+        float computeLighting(Vector3 point, Vector3 normal, Vector3 viewDir, float specular);
     };
 
     AmbientLight::AmbientLight(float intensityIn)
@@ -17,7 +17,7 @@ namespace Light
         intensity = intensityIn;
     }
 
-    float AmbientLight::computeLighting(Vector3 point, Vector3 normal)
+    float AmbientLight::computeLighting(Vector3 point, Vector3 normal, Vector3 viewDir, float specular)
     {
         return intensity;
     }
