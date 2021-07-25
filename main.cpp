@@ -34,25 +34,29 @@ int main()
             Vector3(0, -1, 3),
             1,
             SDL_Color{255, 0, 0, 255},
-            500));
+            500,
+            0.2));
     scene.spheres.emplace_back(
         Sphere(
             Vector3(2, 0, 4),
             1,
             SDL_Color{0, 0, 255, 255},
-            500));
+            500,
+            0.3));
     scene.spheres.emplace_back(
         Sphere(
             Vector3(-2, 0, 4),
             1,
             SDL_Color{0, 255, 0, 255},
-            10));
+            10,
+            0.4));
     scene.spheres.emplace_back(
         Sphere(
             Vector3(0, -5001, 0),
             5000,
             SDL_Color{255, 255, 0, 255},
-            1000));
+            1000,
+            0.5));
 
     scene.lights.emplace_back(std::make_shared<Light::AmbientLight>(0.2));
     scene.lights.emplace_back(std::make_shared<Light::PointLight>(0.6, Vector3(2, 1, 0)));

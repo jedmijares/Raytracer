@@ -21,13 +21,29 @@ const int VIEWPORT_HEIGHT = 10;
 const int VIEWPORT_DISTANCE = 10;
 SDL_Color BACKGROUND_COLOR = SDL_Color{255, 255, 255, 255}; // white
 
+// translate canvas coordinate to position on viewport
 Vector3 canvasToViewport(int x, int y);
+
+// find closest sphere in given direction from given position
 std::pair<Sphere *, float> closestIntersection(Vector3 origin, Vector3 direction, float tMin, float tMax);
-SDL_Color traceRay(Vector3 origin, Vector3 direction, float tMin, float tMax);
+
+// trace a ray from origin to find what color to display
+SDL_Color traceRay(Vector3 origin, Vector3 direction, float tMin, float tMax, uint8_t reflectionRecursionDepth);
+
+// find where a ray intersects with a sphere
 std::pair<float, float> intersectRaySphere(Vector3 origin, Vector3 direction, Sphere sphere);
+
+// return intensity of lighting at a point on an object
 float computeLighting(Vector3 point, Vector3 normal, Vector3 viewDir, float specular);
+
+// scale color by given intensity
 SDL_Color scaleColor(SDL_Color original, float intensity);
+
+// return a value within provided range
 float clamp(float orig, float min, float max);
+
+// reflects a ray across a surface's normal
+Vector3 reflectRay(Vector3 ray, Vector3 normal);
 
 Vector3 canvasToViewport(int x, int y)
 {
@@ -62,7 +78,7 @@ SDL_Color traceRay(Vector3 origin, Vector3 direction, float tMin, float tMax)
     float closestT = intersection.second;
     if (closestSphere)
     {
-        Vector3 point = origin + direction * closestT; // find intersection
+        Vector3 point = origin + direction * closestT; // find intersection point
         Vector3 normal = point - closestSphere->center;
         normal = normal * (1.0 / normal.length());
         float intensity = computeLighting(point, normal, -direction, closestSphere->specular);
@@ -122,6 +138,11 @@ float clamp(float orig, float min, float max)
         return min;
     }
     return orig;
+}
+
+Vector3 reflectRay(Vector3 ray, Vector3 normal)
+{
+    return normal * 2 * normal.dot(ray) - ray;
 }
 
 #endif

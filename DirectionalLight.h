@@ -41,7 +41,7 @@ namespace Light
 
         if (specular >= 0)
         {
-            Vector3 reflectDir = normal * 2 * normal.dot(lightDir_) - lightDir_;
+            Vector3 reflectDir = reflectRay(lightDir_, normal);
             float rDotV = reflectDir.dot(viewDir);
             if (rDotV > 0)
             {
