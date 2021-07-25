@@ -19,7 +19,7 @@ const int CANVAS_HEIGHT = 1280;
 const int VIEWPORT_WIDTH = 10;
 const int VIEWPORT_HEIGHT = 10;
 const int VIEWPORT_DISTANCE = 10;
-SDL_Color BACKGROUND_COLOR = SDL_Color{255, 255, 255, 255}; // white
+SDL_Color BACKGROUND_COLOR = SDL_Color{0, 0, 0, 255}; // white
 
 // translate canvas coordinate to position on viewport
 Vector3 canvasToViewport(int x, int y);
@@ -71,7 +71,7 @@ std::pair<Sphere *, float> closestIntersection(Vector3 origin, Vector3 direction
     return std::make_pair(closestSphere, closestT);
 }
 
-SDL_Color traceRay(Vector3 origin, Vector3 direction, float tMin, float tMax)
+SDL_Color traceRay(Vector3 origin, Vector3 direction, float tMin, float tMax, uint8_t reflectionRecursionDepth)
 {
     auto intersection = closestIntersection(origin, direction, tMin, tMax);
     Sphere *closestSphere = intersection.first;
@@ -82,7 +82,22 @@ SDL_Color traceRay(Vector3 origin, Vector3 direction, float tMin, float tMax)
         Vector3 normal = point - closestSphere->center;
         normal = normal * (1.0 / normal.length());
         float intensity = computeLighting(point, normal, -direction, closestSphere->specular);
-        return scaleColor(closestSphere->color, intensity);
+        SDL_Color localColor = scaleColor(closestSphere->color, intensity);
+
+        float reflective = closestSphere->reflective;
+        if (reflective <= 0 || reflectionRecursionDepth <= 0)
+        {
+            return localColor;
+        }
+        SDL_Color reflectedColor = traceRay(point, reflectRay(-direction, normal), tMin, std::numeric_limits<float>::infinity(), reflectionRecursionDepth - 1);
+
+        localColor = scaleColor(localColor, (1.0 - reflective));
+        reflectedColor = scaleColor(reflectedColor, (reflective));
+        return SDL_Color{
+            (uint8_t)(clamp((float)localColor.r + (float)reflectedColor.r, 0.0, 255.0)),
+            (uint8_t)(clamp((float)localColor.g + (float)reflectedColor.g, 0.0, 255.0)),
+            (uint8_t)(clamp((float)localColor.b + (float)reflectedColor.b, 0.0, 255.0)),
+            (uint8_t)(clamp((float)localColor.a + (float)reflectedColor.a, 0.0, 255.0))};
     }
     return BACKGROUND_COLOR;
 }
@@ -122,8 +137,8 @@ SDL_Color scaleColor(SDL_Color original, float intensity)
 {
     return SDL_Color{
         (uint8_t)(clamp(original.r * intensity, 0, 255)),
-        (uint8_t)(clamp(original.b * intensity, 0, 255)),
         (uint8_t)(clamp(original.g * intensity, 0, 255)),
+        (uint8_t)(clamp(original.b * intensity, 0, 255)),
         (uint8_t)(clamp(original.a * intensity, 0, 255))};
 }
 
