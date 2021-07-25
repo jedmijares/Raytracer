@@ -1,3 +1,5 @@
+#ifndef SPHERE
+#define SPHERE
 
 #include "Vector3.h"
 #include <SDL2/SDL.h>
@@ -25,3 +27,5 @@ Sphere::Sphere(Vector3 centerIn, float radiusIn, SDL_Color colorIn, float specul
 Sphere::~Sphere()
 {
 }
+
+#endif

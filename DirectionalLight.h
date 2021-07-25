@@ -2,6 +2,7 @@
 #define DIRECTIONAL_LIGHT
 
 #include "Light.h"
+#include "Utility.h"
 #include "Vector3.h"
 
 namespace Light
@@ -24,6 +25,12 @@ namespace Light
 
     float DirectionalLight::computeLighting(Vector3 point, Vector3 normal, Vector3 viewDir, float specular)
     {
+        auto shadower = closestIntersection(point, lightDir_, 0.001, std::numeric_limits<float>::infinity());
+        if (shadower.first != nullptr)
+        {
+            return 0.0;
+        }
+
         float returnIntensity = 0;
 
         float nDotL = normal.dot(lightDir_);

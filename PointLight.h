@@ -2,7 +2,11 @@
 #define POINT_LIGHT
 
 #include "Light.h"
+#include "Scene.h"
+#include "Utility.h"
 #include "Vector3.h"
+
+// extern Scene scene;
 
 namespace Light
 {
@@ -24,9 +28,14 @@ namespace Light
 
     float PointLight::computeLighting(Vector3 point, Vector3 normal, Vector3 viewDir, float specular)
     {
-        float returnIntensity = 0;
-
         Vector3 lightDir = position_ - point;
+        auto shadower = closestIntersection(point, lightDir, 0.001, 1.0);
+        if (shadower.first != nullptr)
+        {
+            return 0.0;
+        }
+
+        float returnIntensity = 0;
         float nDotL = normal.dot(lightDir);
         if (nDotL > 0)
         {
