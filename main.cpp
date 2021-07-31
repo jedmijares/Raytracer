@@ -9,11 +9,15 @@
 #include <SDL2/SDL.h>
 #include <algorithm>
 #include <cmath>
+#include <map>
 #include <memory>
+#include <thread>
 #include <utility>
 #include <vector>
 
 Scene scene;
+
+void findColors(const int minX, const int maxX, const int minY, const int maxY, const Vector3 cameraPos, std::map<std::pair<int, int>, SDL_Color> &pixelToColor);
 
 int main()
 {
@@ -63,15 +67,26 @@ int main()
     scene.lights.emplace_back(std::make_shared<Light::DirectionalLight>(0.2, Vector3(1, 4, 4)));
 
     Vector3 cameraPos{0, 0, 0};
-    for (int x = -CANVAS_WIDTH / 2; x < CANVAS_WIDTH / 2; ++x)
+
+    std::map<std::pair<int, int>, SDL_Color> pixelToColor;
+
+    std::thread t1(findColors, -CANVAS_WIDTH / 2, 0, -CANVAS_HEIGHT / 2, 0, cameraPos, std::ref(pixelToColor));
+    std::thread t2(findColors, 0, CANVAS_WIDTH / 2, -CANVAS_HEIGHT / 2, 0, cameraPos, std::ref(pixelToColor));
+    std::thread t3(findColors, -CANVAS_WIDTH / 2, 0, 0, CANVAS_HEIGHT / 2, cameraPos, std::ref(pixelToColor));
+    std::thread t4(findColors, 0, CANVAS_WIDTH / 2, 0, CANVAS_HEIGHT / 2, cameraPos, std::ref(pixelToColor));
+
+    t1.join();
+    t2.join();
+    t3.join();
+    t4.join();
+
+    for (auto itr = pixelToColor.begin(); itr != pixelToColor.end(); ++itr)
     {
-        for (int y = -CANVAS_HEIGHT / 2; y < CANVAS_HEIGHT / 2; ++y)
-        {
-            Vector3 direction = canvasToViewport(x, y);
-            SDL_Color color = traceRay(cameraPos, direction, 0.001, std::numeric_limits<float>::infinity(), 3);
-            SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-            SDL_RenderDrawPoint(renderer, x + CANVAS_WIDTH / 2, -y + CANVAS_HEIGHT / 2);
-        }
+        SDL_Color color = itr->second;
+        int x = (itr->first).first;
+        int y = (itr->first).second;
+        SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+        SDL_RenderDrawPoint(renderer, x + CANVAS_WIDTH / 2, -y + CANVAS_HEIGHT / 2);
     }
 
     SDL_RenderPresent(renderer);
@@ -87,4 +102,17 @@ int main()
     SDL_Quit();
 
     return 0;
+}
+
+void findColors(const int minX, const int maxX, const int minY, const int maxY, const Vector3 cameraPos, std::map<std::pair<int, int>, SDL_Color> &pixelToColor)
+{
+    for (int x = minX; x < maxX; ++x)
+    {
+        for (int y = minY; y < maxY; ++y)
+        {
+            Vector3 direction = canvasToViewport(x, y);
+            SDL_Color color = traceRay(cameraPos, direction, 0.001, std::numeric_limits<float>::infinity(), 3);
+            pixelToColor.emplace(std::make_pair(x, y), color);
+        }
+    }
 }
